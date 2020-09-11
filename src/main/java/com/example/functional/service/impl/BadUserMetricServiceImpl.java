@@ -8,22 +8,27 @@ import org.springframework.stereotype.Service;
 
 @Log4j2
 @Service
-public class UserMetricServiceImpl implements UserMetricService {
+public class BadUserMetricServiceImpl implements UserMetricService {
 
   private final UserRepository userRepository;
 
-  public UserMetricServiceImpl(UserRepository userRepository) {
+  public BadUserMetricServiceImpl(UserRepository userRepository) {
     this.userRepository = userRepository;
   }
 
   @Override
   public User getOldestUser() {
 
-    int oldest = -1;
     User result = null;
 
     for (User user : userRepository.findAll()) {
-      if (user.getAge() > oldest) {
+
+      if (result == null) {
+        result = user;
+        continue;
+      }
+
+      if (user.getAge() > result.getAge()) {
         result = user;
       }
     }
@@ -33,12 +38,16 @@ public class UserMetricServiceImpl implements UserMetricService {
 
   @Override
   public User getYoungestUser() {
-
-    int youngest = Integer.MAX_VALUE;
     User result = null;
 
     for (User user : userRepository.findAll()) {
-      if (user.getAge() < youngest) {
+
+      if (result == null) {
+        result = user;
+        continue;
+      }
+
+      if (user.getAge() < result.getAge()) {
         result = user;
       }
     }

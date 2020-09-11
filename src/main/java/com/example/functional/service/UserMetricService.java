@@ -1,8 +1,10 @@
 package com.example.functional.service;
 
+import com.example.functional.entity.User;
+
 public interface UserMetricService {
 
-  int getOldestUser();
+  User getOldestUser();
 
-  int getYoungestUser();
+  User getYoungestUser();
 }

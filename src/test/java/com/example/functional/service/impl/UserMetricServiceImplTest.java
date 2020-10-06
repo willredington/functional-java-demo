@@ -29,7 +29,8 @@ class UserMetricServiceImplTest {
     servicesToTest =
         Arrays.asList(
             new BadUserMetricServiceImpl(userRepository),
-            new BetterUserMetricServiceImpl(userRepository));
+            new BetterUserMetricServiceImpl(userRepository),
+            new BestUserMetricServiceImpl(userRepository));
   }
 
   @Test

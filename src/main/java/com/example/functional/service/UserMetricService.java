@@ -1,10 +1,13 @@
 package com.example.functional.service;
 
 import com.example.functional.entity.User;
+import java.time.Month;
+import java.util.List;
+import java.util.Map;
 
 public interface UserMetricService {
 
-  User getOldestUser();
+  List<Map<Month, List<User>>> groupUsersByBirthMonth();
 
-  User getYoungestUser();
+  List<Map<Integer, List<User>>> groupUsersByAge();
 }

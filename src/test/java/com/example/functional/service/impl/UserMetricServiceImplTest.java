@@ -1,11 +1,8 @@
 package com.example.functional.service.impl;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
 import com.example.functional.constant.Data;
-import com.example.functional.entity.User;
 import com.example.functional.repository.UserRepository;
 import com.example.functional.service.UserMetricService;
 import java.util.ArrayList;
@@ -32,38 +29,20 @@ class UserMetricServiceImplTest {
     servicesToTest =
         Arrays.asList(
             new BadUserMetricServiceImpl(userRepository),
-            new BetterUserMetricServiceImpl(userRepository),
-            new SlightlyBetterUserMetricServiceImpl(userRepository),
-            new MuchBetterUserMetricServiceImpl(userRepository),
-            new SlightlyMuchBetterUserMetricServiceImpl(userRepository),
-            new BestUserMetricServiceImpl(userRepository));
+            new BetterUserMetricServiceImpl(userRepository));
   }
 
   @Test
-  void getOldestUser() {
-
+  void shouldGroupUsersByBirthMonth() {
     for (UserMetricService service : servicesToTest) {
-
-      log.info("get oldest user for service {}", service.getClass().getSimpleName());
-
-      User oldestUser = service.getOldestUser();
-
-      assertNotNull(oldestUser);
-      assertEquals(120, oldestUser.getAge());
+      TestHelper.assertMonths(service.groupUsersByBirthMonth());
     }
   }
 
   @Test
-  void getYoungestUser() {
-
+  void shouldGroupUsersByAges() {
     for (UserMetricService service : servicesToTest) {
-
-      log.info("get youngest user for service {}", service.getClass().getSimpleName());
-
-      User youngestUser = service.getYoungestUser();
-
-      assertNotNull(youngestUser);
-      assertEquals(3, youngestUser.getAge());
+      TestHelper.assertAges(service.groupUsersByAge());
     }
   }
 }

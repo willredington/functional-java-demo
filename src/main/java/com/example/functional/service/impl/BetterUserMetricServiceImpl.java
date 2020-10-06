@@ -1,9 +1,17 @@
 package com.example.functional.service.impl;
 
-import com.example.functional.condition.ValueCondition;
 import com.example.functional.entity.User;
 import com.example.functional.repository.UserRepository;
 import com.example.functional.service.UserMetricService;
+import java.time.Month;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
@@ -17,50 +25,55 @@ public class BetterUserMetricServiceImpl implements UserMetricService {
     this.userRepository = userRepository;
   }
 
-  private boolean compareUser(User user, int valueToCheck, ValueCondition condition) {
-    return condition.matches(user.getAge(), valueToCheck);
-  }
+  private <T> List<Map<T, List<User>>> groupUserBySomething(
+      Function<User, T> getKeyCallback,
+      Function<User, List<User>> callbackIfEmpty,
+      BiFunction<User, List<User>, List<User>> callbackIfNotEmpty) {
 
-  private User getUserByCondition(ValueCondition valueCondition) {
-
-    User result = null;
+    Map<T, List<User>> result = new HashMap<>();
 
     for (User user : userRepository.findAll()) {
 
-      if (result == null) {
-        result = user;
-        continue;
-      }
+      // get the key from the user
+      T key = getKeyCallback.apply(user);
 
-      boolean matchesCondition = compareUser(user, result.getAge(), valueCondition);
+      // call the update map callback
+      result.compute(
+          key,
+          (theKey, groupOfUsers) -> {
+            if (groupOfUsers == null) {
+              return callbackIfEmpty.apply(user);
+            }
 
-      if (matchesCondition) {
-        result = user;
-      }
+            return callbackIfNotEmpty.apply(user, groupOfUsers);
+          });
     }
 
-    return result;
+    // convert map to a list of maps
+    return result.entrySet().stream()
+        .map(entry -> Collections.singletonMap(entry.getKey(), entry.getValue()))
+        .collect(Collectors.toList());
   }
 
   @Override
-  public User getOldestUser() {
-    return getUserByCondition(
-        new ValueCondition() {
-          @Override
-          public boolean matches(int inputValue, int valueToCompare) {
-            return inputValue > valueToCompare;
-          }
+  public List<Map<Month, List<User>>> groupUsersByBirthMonth() {
+    return groupUserBySomething(
+        user -> user.getBirthDate().getMonth(),
+        userToAdd -> new ArrayList<>(Collections.singletonList(userToAdd)),
+        (userToAdd, usersInGroup) -> {
+          usersInGroup.add(userToAdd);
+          return usersInGroup;
         });
   }
 
   @Override
-  public User getYoungestUser() {
-    return getUserByCondition(
-        new ValueCondition() {
-          @Override
-          public boolean matches(int inputValue, int valueToCompare) {
-            return inputValue < valueToCompare;
-          }
+  public List<Map<Integer, List<User>>> groupUsersByAge() {
+    return groupUserBySomething(
+        User::getAge,
+        userToAdd -> new ArrayList<>(Collections.singletonList(userToAdd)),
+        (userToAdd, usersInGroup) -> {
+          usersInGroup.add(userToAdd);
+          return usersInGroup;
         });
   }
 }
